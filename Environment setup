@@ -1,0 +1,7 @@
+Ubuntu 15.04
+> sudo apt-get -y install python3-pip
+> sudo pip3 install psutil 
+> sudo pip3 install py-cpuinfo
+> sudo pip3 install tornado
+
+
