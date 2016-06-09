@@ -18,7 +18,7 @@ def threaded_function():
     while True:
         global client
         if isinstance(client, tornado.websocket.WebSocketHandler):
-            print('pushing data to client')
+            #print('pushing data to client')
             loop = tornado.ioloop.IOLoop.instance()
             loop.add_callback(callback=lambda: client.pushStatus())
 
@@ -52,19 +52,17 @@ class WSHandler(tornado.websocket.WebSocketHandler):
 
     def pushStatus(self):
         cpu_load = psutil.cpu_percent(interval=0, percpu=True)
-        cpu_times = psutil.cpu_times(percpu=True)
         network_traffic = psutil.net_io_counters()
         boot_time = psutil.boot_time()
 
         disk_usage = psutil.disk_usage('/')
         disk_io_counters = psutil.disk_io_counters(perdisk=False)
 
-        payload = {'cpu_load': cpu_load,
-        'cpu_times': cpu_times,
-        'network_traffic': network_traffic,
-        'boot_time': boot_time,
-        'disk_usage': disk_usage,
-        'disk_io_counters': disk_io_counters}
+        payload = {'cpu': {'load': cpu_load},
+                   'network': {'traffic': network_traffic},
+                   'disk': {'disk_usage': disk_usage,
+                            'disk_io_counters': disk_io_counters},
+                   'boot_time': boot_time}
         self.write_message(self.build_message(payload))
 
     def handleInfoCommand(self):
@@ -74,6 +72,7 @@ class WSHandler(tornado.websocket.WebSocketHandler):
 
     def open(self):
         print('new connection')
+        self.set_nodelay(True)
         self.write_message('Hi, client: connection is made ...')
         global client
         client = self
